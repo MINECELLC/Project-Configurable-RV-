@@ -86,13 +86,13 @@ end generate;
 l32_sub:if xlen = 32 generate
  
 with  alu_rvi_instr.cop select
-subarg1   <= '0' & alu_rvi_instr.rs1_value  when sub | sltu,
-             alu_rvi_instr.rs1_value(xlen -1) & alu_rvi_instr.rs1_value(xlen - 1 downto 0) when slt,
+subarg1   <= '0' & alu_rvi_instr.rs1_value  when sub | stlu,
+             alu_rvi_instr.rs1_value(xlen -1) & alu_rvi_instr.rs1_value(xlen - 1 downto 0) when stl,
              (others => '0') when others;
 			 
 with  alu_rvi_instr.cop select 
-subarg2   <= '0' & alu_rvi_instr.rs2_value  when sub | sltu,
-             alu_rvi_instr.rs2_value(xlen -1) & alu_rvi_instr.rs2_value(xlen - 1 downto 0) when slt,
+subarg2   <= '0' & alu_rvi_instr.rs2_value  when sub | stlu,
+             alu_rvi_instr.rs2_value(xlen -1) & alu_rvi_instr.rs2_value(xlen - 1 downto 0) when stl,
              (others => '0') when others;
 
 end generate;			 
@@ -101,15 +101,15 @@ end generate;
 l64_sub:if xlen = 64 generate
  
 with  alu_rvi_instr.cop select
-subarg1   <= '0' & alu_rvi_instr.rs1_value  when sub | sltu,
+subarg1   <= '0' & alu_rvi_instr.rs1_value  when sub | stlu,
              '0' & zero(31 downto 0) & alu_rvi_instr.rs1_value(31 downto 0) when subw,
-             s1 & alu_rvi_instr.rs1_value(xlen - 1 downto 0) when slt,
+             s1 & alu_rvi_instr.rs1_value(xlen - 1 downto 0) when stl,
              (others => '0') when others;
 			 
 with  alu_rvi_instr.cop select 
-subarg2   <= '0' & alu_rvi_instr.rs2_value  when sub | sltu,
+subarg2   <= '0' & alu_rvi_instr.rs2_value  when sub | stlu,
              '0' & zero(31 downto 0) & alu_rvi_instr.rs1_value(31 downto 0) when subw,
-             s2 & alu_rvi_instr.rs2_value(xlen - 1 downto 0) when slt,
+             s2 & alu_rvi_instr.rs2_value(xlen - 1 downto 0) when stl,
              (others => '0') when others;
 
 end generate;			 
@@ -120,8 +120,8 @@ l32_sub_rd:if xlen = 32 generate
 
    with  alu_rvi_instr.cop select
    sub_rd <= subres(xlen-1 downto 0)  when sub,
-             zero(xlen-1 downto 1) &  subres(xlen) when sltu,
-			 zero(xlen-1 downto 1) & ((s1 and (s1 xor s2)) or (sr and not(s1 xor s2))) when slt,
+             zero(xlen-1 downto 1) &  subres(xlen) when stlu,
+			 zero(xlen-1 downto 1) & ((s1 and (s1 xor s2)) or (sr and not(s1 xor s2))) when stl,
              (others => '0') when others;
 
 end generate;
@@ -130,9 +130,9 @@ l64_sub_rd:if xlen = 64 generate
    
 with  alu_rvi_instr.cop select
 sub_rd <= subres(xlen-1 downto 0)  when sub,
-          zero(xlen-1 downto 1) &  subres(xlen) when sltu,
+          zero(xlen-1 downto 1) &  subres(xlen) when stlu,
           zero(xlen-1 downto 32) & subres(31 downto 0) when subw,
-		  zero(xlen-1 downto 1) & ((s1 and (s1 xor s2)) or (sr and not(s1 xor s2))) when slt,
+		  zero(xlen-1 downto 1) & ((s1 and (s1 xor s2)) or (sr and not(s1 xor s2))) when stl,
           (others => '0') when others;
 
 end generate;
