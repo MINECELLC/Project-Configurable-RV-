@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
--- Company      : MultiClet
+-- Company      : MineCell LLC
 -- Project      : RV-64
 -- Design       : 
 -- Function     : 
