@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- Company      : UralArclab 
+-- Company      : MineCell LLC
 -- Project      : MI(mi)MD(mi,md)
 -- Design       : McP 
 -- Function     : This package defines constants
