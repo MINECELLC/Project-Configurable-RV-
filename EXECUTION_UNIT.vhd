@@ -1,36 +1,39 @@
-------------------------------------------------------------------------------------------------------------------------------------
--- Company      : MineCell LLC
+----------------------------------------------------------------------------
+-- Company      : MultiClet
 -- Project      : RV-64
--- Design       :
+-- Design       : 
 -- Function     : 
--- Designed by  : 
--- Modif\Created: 
--- Remarks      : 
--------------------------------------------------------------------------------------------------------------------------------------
+-- Developer    : 
+-- Mod.\Created : 
+-- Last modified: 
+----------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.STD_LOGIC_MISC.ALL;
+--use ieee.std_logic_signed.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
 library work;
-USE work.rv_configuration.all;
+use work.rv_configuration.all;
+use work.project_constans.all;
 
-
-  entity EXECUTION_UNIT is
-    port(
-         arst                       : in    std_logic;
-         clk                        : in    std_logic;
-         buf_reset                  : in    std_logic;
-         buffer_instr               : in    instr_for_buffer;
-         res_flow                   : in    result_array;
-		 branch                     : out   std_logic;
-         branch_state               : out   std_logic;
-         instr_buffer for_i_m_ready : out   std_logic;
-         result                     : out   result
+ENTITY EXECUTION_UNIT IS
+    PORT(
+         arst                       : IN    std_logic;
+         clk                        : IN    std_logic;
+         buf_reset                  : IN    std_logic;
+         buffer_instr               : IN    instr_for_buffer;
+         res_flow                   : IN    result_array;
+		 branch                     : OUT   std_logic;
+         branch_state               : OUT   std_logic;
+         instrbuf for_I_M_ready     : OUT   std_logic;
+		 instrbuf for_F_ready       : OUT   std_logic;
+		 instrbuf for_D_ready       : OUT   std_logic;
+         instrbuf for_RW_ready      : OUT   std_logic;
+         result                     : OUT   result
          );
-    end EXECUTION_UNIT;
+END EXECUTION_UNIT;
 
-architecture rtl of EXECUTION_UNIT is
+ARCHITECTURE rtl OF EXECUTION_UNIT IS
 
    	signal  alu_rvi_busy        : std_logic;
     signal  mul_rvm_busy        : std_logic;
@@ -42,7 +45,7 @@ architecture rtl of EXECUTION_UNIT is
 	signal  bus_busy_for_MULDIV : std_logic;
     signal  muldiv_rvm_res      : result;
 	
-COMPONENT INSTR_BUFFER for_I_M IS 
+COMPONENT INSTR_BUFFER for_I_M  IS 
   PORT(
       arst                        : IN     std_logic;
       clk                         : IN     std_logic;
@@ -52,9 +55,10 @@ COMPONENT INSTR_BUFFER for_I_M IS
 	  alu_rvi_busy                : IN     std_logic;
       mul_rvm_busy                : IN     std_logic;
 	  div_rvm_busy                : IN     std_logic;
-      INSTR_BUFFER for_I_M_ready  : OUT    std_logic;
+      instrbuf for_I_M_ready      : OUT    std_logic;
 	  alu_rvi_instr               : OUT    instr_for_alu_rvi;
-      muldiv_rvm_instr            : OUT    instr_for_muldiv_rvm
+      mul_rvm_instr               : OUT    instr_for_muldiv_rvm;
+      div_rvm_instr               : OUT    instr_for_muldiv_rvm
       );
 END COMPONENT INSTR_BUFFER for_I_M;
 
@@ -75,7 +79,8 @@ COMPONENT MULDIV_RVM IS
   PORT(
       arst                  : IN  std_logic;
       clk                   : IN  std_logic;
-      muldiv_rvm_instr      : IN  instr_for_muldiv_rvm;
+      mul_rvm_instr         : IN  instr_for_muldiv_rvm;
+      div_rvm_instr         : IN  instr_for_muldiv_rvm
 	  bus_busy              : IN  std_logic;
 	  muldiv_rvm_res        : OUT result;
 	  mul_rvm_busy          : OUT std_logic;
@@ -83,20 +88,69 @@ COMPONENT MULDIV_RVM IS
       );
 END COMPONENT MULDIV_RVM;
 
-COMPONENT INSTR_BUFFER for_F_D IS 
+COMPONENT INSTR_BUFFER for_F IS 
   PORT(
       arst                        : IN     std_logic;
       clk                         : IN     std_logic;
 	  buf_reset                   : IN     std_logic;
       buffer_instr                : IN     instr_for_buffer;
       res_flow                    : IN     result_array;
-	  spf_rvf_busy                : IN     std_logic;
-      dpf_rvd_busy                : IN     std_logic;
-	  instr_buffer for_f_d_ready  : OUT    std_logic;
-	  spf_rvf_instr               : OUT    instr_for_spf_rvf;
-      dpf_rvd_instr               : OUT    instr_for_dpf_rvf
+	  mul_rvf_busy                : IN     std_logic;
+      div_rvf_busy                : IN     std_logic;
+	  others_rvf_busy             : IN     std_logic;
+	  instrbuf for_F_ready        : OUT    std_logic;
+	  mul_rvf_instr               : OUT    instr_for_spf_rvf;
+      div_rvf_instr               : OUT    instr_for_spf_rvf;
+	  others_rvf_instr            : OUT    instr_for_spf_rvf
       );
-END COMPONENT INSTR_BUFFER for_F_D;
+END COMPONENT INSTR_BUFFER for_F;
+
+COMPONENT SPF_RVF IS
+  PORT(
+      arst                  : IN  std_logic;
+      clk                   : IN  std_logic;
+      mul_rvf_instr         : IN  instr_for_spf_rvf;
+	  div_rvf_instr         : IN  instr_for_spf_rvf;
+      others_rvf_instr      : IN  instr_for_spf_rvf;
+      bus_busy              : IN  std_logic;
+      spf_rvf_res           : OUT result;
+      mul_rvf_busy          : OUT std_logic;
+	  div_rvf_busy          : OUT std_logic;
+      others_rvf_busy       : OUT std_logic
+      );
+END COMPONENT SPF_RVF;
+
+COMPONENT INSTR_BUFFER for_D IS 
+  PORT(
+      arst                        : IN     std_logic;
+      clk                         : IN     std_logic;
+	  buf_reset                   : IN     std_logic;
+      buffer_instr                : IN     instr_for_buffer;
+      res_flow                    : IN     result_array;
+	  mul_rvd_busy                : IN     std_logic;
+      div_rvd_busy                : IN     std_logic;
+	  others_rvd_busy             : IN     std_logic;
+	  instrbuf for_d_ready        : OUT    std_logic;
+	  mul_rvd_instr               : OUT    instr_for_dpf_rvd;
+      div_rvd_instr               : OUT    instr_for_dpf_rvd;
+	  others_rvd_instr            : OUT    instr_for_dpf_rvd
+      );
+END COMPONENT INSTR_BUFFER for_D;
+
+COMPONENT DPF_RVD IS
+  PORT(
+      arst                  : IN  std_logic;
+      clk                   : IN  std_logic;
+      mul_rvd_instr         : IN  instr_for_dpf_rvd;
+	  div_rvd_instr         : IN  instr_for_dpf_rvd;
+      others_rvd_instr      : IN  instr_for_dpf_rvd;
+      bus_busy              : IN  std_logic;
+      dpf_rvd_res           : OUT result;
+      mul_rvd_busy          : OUT std_logic;
+	  div_rvd_busy          : OUT std_logic;
+      others_rvd_busy       : OUT std_logic
+      );
+END COMPONENT DPF_RVD;
 
 COMPONENT INSTR_BUFFER for_RW IS 
   PORT(
@@ -107,7 +161,7 @@ COMPONENT INSTR_BUFFER for_RW IS
       res_flow                    : IN     result_array;
 	  current_instr_number        : IN     integer range 0 to maximum_order;
       rwu_rv_busy                 : IN     std_logic;
-      INSTR_BUFFER for_RW_ready   : OUT    std_logic;
+      instrbuf for_RW_ready       : OUT    std_logic;
 	  rwu_rv_instr                : OUT    instr_for_rwu_rv
       );
 END COMPONENT INSTR_BUFFER for_RW;
@@ -124,9 +178,10 @@ ib for_i_m: entity work.INSTR_BUFFER for_I_M
 	  alu_rvi_busy                 =>  alu_rvi_busy,
       mul_rvm_busy                 =>  mul_rvm_busy,
 	  div_rvm_busy                 =>  div_rvm_busy,
-      INSTR_BUFFER for_I_M_ready   =>  instr_buffer for_i_m_ready,
+      instrbuf for_I_M_ready       =>  instrbuf for_i_m_ready,
 	  alu_rvi_instr                =>  alu_rvi_instr,
-      muldiv_rvm_instr             =>  muldiv_rvm_instr             
+      mul_rvm_instr                =>  mul_rvm_instr;
+      div_rvm_instr                =>  div_rvm_instr             
       );
 
 alu: entity work.ALU_RVI 
@@ -141,13 +196,14 @@ alu: entity work.ALU_RVI
 	  alu_rvi_busy          =>  alu_rvi_busy
       );
 	  
-analysis_on_M : if M = yes generate
+analysis_on_M : if Standard_Extension_M = yes generate
 
 muldiv: entity work.MULDIV_RVM
   PORT(
       arst                   =>  arst,
       clk                    =>  clk,
-      muldiv_rvm_instr       =>  muldiv_rvm_instr,
+      mul_rvm_instr          =>  mul_rvm_instr,
+	  div_rvm_instr          =>  div_rvm_instr,
 	  bus_busy               =>  bus_busy_for_MULDIV,
 	  muldiv_rvm_res         =>  muldiv_rvm_res,
 	  mul_rvm_busy           =>  mul_rvm_busy,
@@ -155,6 +211,77 @@ muldiv: entity work.MULDIV_RVM
       );
 
 end generate;
+
+
+analysis_on_F : if Standard_Extension_F = yes generate
+
+
+ib for_f: entity work.INSTR_BUFFER for_F 
+  PORT(
+      arst                     =>  arst,
+      clk                      =>  clk,
+      buf_reset                =>  buf_reset,
+      buffer_instr             =>  buffer_instr,
+      res_flow                 =>  res_flow,
+	  mul_rvf_busy             =>  mul_rvf_busy,
+      div_rvf_busy             =>  div_rvf_busy,
+	  others_rvf_busy          =>  others_rvf_busy,
+   	  instrbuf for_f_ready =>  instrbuf for_f_ready,
+	  mul_rvf_instr            =>  mul_rvf_instr,
+      div_rvf_instr            =>  div_rvf_instr,
+	  others_rvf_instr         =>  others_rvf_instr
+      );
+
+spf: entity work.SPF_RVF
+  PORT(
+      arst                   =>  arst,
+      clk                    =>  clk,
+      mul_rvf_instr          =>  mul_rvf_instr,
+	  div_rvf_instr          =>  div_rvf_instr,
+	  others_rvf_instr       =>  others_rvf_instr,
+      bus_busy               =>  bus_busy_for_SPF_RVF,
+      spf_rvf_res            =>  spf_rvf_res              ,
+      mul_rvf_busy           =>  mul_rvf_busy,
+      div_rvf_busy           =>  div_rvf_busy
+	  others_rvf_busy        =>  others_rvf_busy
+      );
+
+end generate;
+
+analysis_on_D : if Standard_Extension_D = yes generate
+
+ib for_d: entity work.INSTR_BUFFER for_D 
+  PORT(
+      arst                     =>  arst,
+      clk                      =>  clk,
+      buf_reset                =>  buf_reset,
+      buffer_instr             =>  buffer_instr,
+      res_flow                 =>  res_flow,
+	  mul_rvd_busy             =>  mul_rvd_busy,
+      div_rvd_busy             =>  div_rvd_busy,
+	  others_rvd_busy          =>  others_rvd_busy,
+   	  instrbuf for_d_ready     =>  instrbuf for_d_ready,
+	  mul_rvd_instr            =>  mul_rvd_instr,
+      div_rvd_instr            =>  div_rvd_instr,
+	  others_rvd_instr         =>  others_rvd_instr
+      );
+
+dpf: entity work.DPF_RVD
+  PORT(
+      arst                   =>  arst,
+      clk                    =>  clk,
+      mul_rvd_instr          =>  mul_rvd_instr,
+	  div_rvd_instr          =>  div_rvd_instr,
+	  others_rvd_instr       =>  others_rvd_instr,
+      bus_busy               =>  bus_busy_for_DPF_RVD,
+      dpf_rvd_res            =>  dpf_rvd_res              ,
+      mul_rvd_busy           =>  mul_rvd_busy,
+      div_rvd_busy           =>  div_rvd_busy
+	  others_rvd_busy        =>  others_rvd_busy
+      );
+
+end generate;
+
 
 result <= muldiv_rvm_res when muldiv_rvm_res.ready = '1' else alu_rvi_res;
 

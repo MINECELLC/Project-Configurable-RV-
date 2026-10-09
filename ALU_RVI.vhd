@@ -1,21 +1,20 @@
-------------------------------------------------------------------------------------------------------------------------------------
--- Company      : MineCell LLC
+ ----------------------------------------------------------------------------
+-- Company      : MultiClet
 -- Project      : RV-64
--- Design       :
+-- Design       : 
 -- Function     : 
--- Designed by  : 
--- Modif\Created: 
--- Remarks      : 
--------------------------------------------------------------------------------------------------------------------------------------
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-USE ieee.std_logic_unsigned.all;
---USE ieee.std_logic_signed.all;
-USE ieee.numeric_std.all; 
+-- Developer    : 
+-- Mod.\Created : 
+-- Last modified: 
+----------------------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+--use ieee.std_logic_signed.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
 library work;
-USE work.rv_configuration.all;
-USE work.convertion_pkg.all;
---use work.encoder_pkg.all;
+use work.rv_configuration.all;
+use work.project_constans.all;
 
 ENTITY ALU_RVI IS
    PORT(
@@ -28,9 +27,9 @@ ENTITY ALU_RVI IS
 	  alu_rvi_res           : OUT result;
 	  alu_rvi_busy          : OUT std_logic
    );
-END alu_rvi ;
+END ALU_RVI ;
 
-ARCHITECTURE rtl OF alu_rvi IS
+ARCHITECTURE rtl OF ALU_RVI IS
 
  
   signal  zero                                      :  std_logic_vector(xlen-1 downto 0);
